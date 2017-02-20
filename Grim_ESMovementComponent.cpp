@@ -19,7 +19,6 @@ UGrim_ESMovementComponent::UGrim_ESMovementComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
@@ -52,6 +51,7 @@ void UGrim_ESMovementComponent::TickComponent( float DeltaTime, ELevelTick TickT
 	if (!_initialized) 
 		return;
 
+	// Disables sprinting if stamina is 0 or less
 	if (_staminaComponent->StaminaConfig.stamina <= 0)
 	{
 		bSprinting = false;
@@ -59,6 +59,7 @@ void UGrim_ESMovementComponent::TickComponent( float DeltaTime, ELevelTick TickT
 	}
 }
 
+// Handles forward and backward movement
 void UGrim_ESMovementComponent::MoveForward(float Value)
 {
 	if (!_initialized)
@@ -69,6 +70,7 @@ void UGrim_ESMovementComponent::MoveForward(float Value)
 		return;
 	}
 
+	// Sets different rotation rates for when the player is on the ground vs in the air
 	if (!CanJump())
 	{
 		_characterMovement->RotationRate = FRotator(0, 115, 0);
@@ -87,6 +89,7 @@ void UGrim_ESMovementComponent::MoveForward(float Value)
 	_character->AddMovementInput(Direction, Value);
 }
 
+// Handles right and left movement
 void UGrim_ESMovementComponent::MoveRight(float Value)
 {
 	if (!_initialized)
@@ -97,6 +100,7 @@ void UGrim_ESMovementComponent::MoveRight(float Value)
 		return;
 	}
 
+	// Sets different rotation rates for when the player is on the ground vs in the air
 	if (!CanJump())
 	{
 		_characterMovement->RotationRate = FRotator(0, 115, 0);
@@ -118,6 +122,7 @@ void UGrim_ESMovementComponent::MoveRight(float Value)
 
 void UGrim_ESMovementComponent::Sprint()
 {
+	// Checks if the amount of stamina is greater than 0 and enables sprinting if it is
 	if (_staminaComponent->StaminaConfig.stamina > 0)
 	{
 		bSprinting = true;
@@ -133,6 +138,7 @@ void UGrim_ESMovementComponent::StopSprinting()
 
 void UGrim_ESMovementComponent::Landed(const FHitResult & HitResult)
 {
+	// Currently unused function for what happens to player upon landing from a fall, handled in Grim_ESPlayerMovementComponent.cpp
 }
 
 bool UGrim_ESMovementComponent::getSprinting()

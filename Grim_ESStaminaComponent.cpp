@@ -5,15 +5,15 @@
 
 void UGrim_ESStaminaComponent::RegenStamina()
 {
-	if (StaminaConfig.stamina <= 0 && !zeroStamina)
+	if (StaminaConfig.stamina <= 0 && !zeroStamina) // Slows down stamina regen rate when 0 stamina is reached, reset when stamina is fully regained
 	{
 		zeroStamina = true;
 		StaminaConfig.staminaRegenRate = StaminaConfig.staminaRegenRate * 0.85;
 	}
 
-	AddStamina(StaminaConfig.staminaRegen * StaminaConfig.staminaRegenRate * deltaTick);
+	AddStamina(StaminaConfig.staminaRegen * StaminaConfig.staminaRegenRate * deltaTick); // Adds stamina, uses deltaTick to keep regen even across all tick rates
 
-	if (StaminaConfig.stamina >= StaminaConfig.maxStamina && zeroStamina)
+	if (StaminaConfig.stamina >= StaminaConfig.maxStamina && zeroStamina) // Resets stamin regen rate if it was slowed down
 	{
 		zeroStamina = false;
 		StaminaConfig.staminaRegenRate = StaminaConfig.staminaRegenRate / 0.85;
@@ -25,7 +25,6 @@ UGrim_ESStaminaComponent::UGrim_ESStaminaComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	bWantsBeginPlay = true;
 	PrimaryComponentTick.bCanEverTick = true;
 	zeroStamina = false;
 	deltaTick = 0;
@@ -44,9 +43,10 @@ void UGrim_ESStaminaComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	deltaTick = DeltaTime;
-	RegenStamina(); // TODO: add something here to only update on the regen rate interval
+	deltaTick = DeltaTime; // Helps keep regen even across all tick rates
+	RegenStamina();
 
+	// Stops ticking if stamina is full
 	if (StaminaConfig.stamina >= StaminaConfig.maxStamina)
 	{
 		StopTick();
@@ -84,5 +84,6 @@ void UGrim_ESStaminaComponent::StopTick()
 
 bool UGrim_ESStaminaComponent::GetTicking()
 {
+	// Relays state of ticking to other components if called
 	return IsComponentTickEnabled();
 }

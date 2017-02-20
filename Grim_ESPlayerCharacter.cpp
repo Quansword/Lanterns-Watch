@@ -5,6 +5,8 @@
 
 void AGrim_ESPlayerCharacter::RotateToCursor()
 {
+	// Rotates character toward cursor location, used for attacks
+	// TODO rework system to add delay to character turn
 	if (_playerController) {
 		auto newRotation = _playerController->CalculateRotationToCursor(GetActorLocation());
 		SetActorRotation(newRotation);
@@ -13,6 +15,7 @@ void AGrim_ESPlayerCharacter::RotateToCursor()
 
 AGrim_ESPlayerCharacter::AGrim_ESPlayerCharacter()
 {
+	// Set up components
 	FallDamageComponent = CreateDefaultSubobject<UGrim_ESFallDamageComponent>(TEXT("FallDamageComponent"));
 	FallDamageComponent->SetDamageComponent(DamageComponent);
 
@@ -27,7 +30,7 @@ AGrim_ESPlayerCharacter::AGrim_ESPlayerCharacter()
 	AttackComponent = PlayerAttackComponent;
 
 	CameraComponent = CreateDefaultSubobject<UGrim_ESCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->AttachTo(RootComponent);
+	CameraComponent->SetupAttachment(RootComponent);
 
 	// Set size for player capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -37,6 +40,7 @@ AGrim_ESPlayerCharacter::AGrim_ESPlayerCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+	// Set default variable values
 	attackNum = 0;
 	canAttack = true;
 	bAttacking = false;
@@ -54,12 +58,14 @@ void AGrim_ESPlayerCharacter::BeginPlay()
 		return;
 	}
 
+	// Adds pause menu widget
 	PauseMenu = CreateWidget<UUserWidget>(_playerController, PauseMenuClass);
 	PauseMenu->AddToViewport();
 }
 
 void AGrim_ESPlayerCharacter::Tick(float deltaTime)
 {
+	// Rotates player to cursor if they are attacking
 	if (bAttacking || bHeavyAttacking)
 	{
 		RotateToCursor();
@@ -196,7 +202,7 @@ void AGrim_ESPlayerCharacter::Sprint() // Call StartSprint() function
 
 void AGrim_ESPlayerCharacter::StopSprinting()
 {
-	GetWorldTimerManager().ClearTimer(MovementTimerHandle);
+	GetWorldTimerManager().ClearTimer(MovementTimerHandle); // Stops sprint from restarting from an existing timer
 	PlayerMovementComponent->StopSprinting();
 	bSprinting = PlayerMovementComponent->getSprinting();
 	if (!IsPlayingRootMotion() && CanJump() && !bAttacking && !bHeavyAttacking)
@@ -217,5 +223,6 @@ void AGrim_ESPlayerCharacter::StartSprint() // Call Sprint function in the playe
 
 void AGrim_ESPlayerCharacter::StartStaminaTick()
 {
+	// Stamina component tick starts stamina regeneration
 	StaminaComponent->StartTick();
 }
